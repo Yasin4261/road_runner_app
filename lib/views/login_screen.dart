@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../constants/colors.dart';
+import 'package:road_runner_app/views/home_screen.dart'; // HomeScreen importu
 
 import '../views/register_screen.dart';
 
@@ -152,20 +153,27 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _isLoading = true);
 
       try {
-        /*
-        await _authService.signIn(
-          _emailController.text,
-          _passwordController.text,
-        );
-        */
+        // Giriş işlemi
+        // Örneğin:
+        // final userCredential = await _authService.signIn(
+        //   _emailController.text.trim(),
+        //   _passwordController.text.trim(),
+        // );
+        context.go('/home'); // test için boş bırakıllmıştır silinmeli
 
         if (mounted) {
-          Navigator.of(context).pushReplacementNamed('/home');
+          // Giriş başarılı, ana sayfaya yönlendir
+          context.go('/home');
         }
       } catch (e) {
+        print('Hata oluştu: $e');
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString())),
+            SnackBar(
+              content: Text('Giriş yaparken hata: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       } finally {

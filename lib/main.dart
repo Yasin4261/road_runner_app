@@ -7,40 +7,34 @@ import 'package:road_runner_app/views/login_screen.dart';
 import 'package:road_runner_app/constants/app_theme.dart';
 import 'package:road_runner_app/views/register_screen.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({Key? key}) : super(key: key);
+
+  final GoRouter _router = GoRouter(
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/home',
+        builder: (context, state) => const HomeScreen(),
+      ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
-    // Define your routes using GoRouter
-    final GoRouter _router = GoRouter(
-      initialLocation: '/login', // Default route
-      routes: [
-        GoRoute(
-          path: '/login',
-          builder: (context, state) => const LoginScreen(),
-        ),
-        GoRoute(
-          path: '/home',
-          builder: (context, state) => const HomeScreen(),
-        ),
-        GoRoute(
-          path: '/register',
-          builder: (context, state) =>
-              const RegisterScreen(), // Replace with your actual RegisterScreen
-        ),
-      ],
-    );
-
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Kurye App',
       theme: AppTheme.theme,
-      routerConfig: _router, // Use the router configuration
+      routerConfig: _router,
     );
   }
 }

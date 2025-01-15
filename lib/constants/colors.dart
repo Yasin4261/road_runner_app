@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const Color primary = Color(0xFF6200EE); // Ana renk
-  static const Color secondary = Color(0xFF03DAC6); // İkincil renk
-  static const Color background = Color(0xFFF5F5F5); // Arka plan rengi
-  static const Color textPrimary = Color(0xFF000000); // Ana metin rengi
-  static const Color textSecondary = Color(0xFF757575); // İkincil metin rengi
-  static const Color error = Color(0xFFB00020); // Hata rengi
+  static const Color primary = Color(0xFF6200EE);
+  static const Color secondary = Color(0xFF03DAC6);
+  static const Color background = Color(0xFF121212); // Koyu arka plan
+  static const Color textPrimary = Color(0xFFFFFFFF); // Beyaz metin
+  static const Color textSecondary = Color(0xFFB3B3B3); // Gri metin
+  static const Color error = Color(0xFFCF6679); // Koyu tema hata rengi
 }

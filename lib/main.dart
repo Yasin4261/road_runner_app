@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
-// Import your screens
+import 'package:road_runner_app/constants/app_theme.dart';
 import 'package:road_runner_app/views/home_screen.dart';
 import 'package:road_runner_app/views/login_screen.dart';
-import 'package:road_runner_app/constants/app_theme.dart';
 import 'package:road_runner_app/views/register_screen.dart';
 
 void main() async {
@@ -25,6 +23,9 @@ class MyApp extends StatelessWidget {
         path: '/home',
         builder: (context, state) => const HomeScreen(),
       ),
+      GoRoute(
+          path: '/register',
+          builder: (context, state) => const RegisterScreen()),
     ],
   );
 

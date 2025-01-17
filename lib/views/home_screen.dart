@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:road_runner_app/widgets/custom_app_bar.dart';
+import 'package:road_runner_app/widgets/map_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -77,33 +78,60 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Ana Sayfa'),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text(
+                'Menü',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.home),
+              title: const Text('Ana Sayfa'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Ayarlar'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Çıkış Yap'),
+              onTap: () {
+                Navigator.pop(context);
+                // Çıkış işlemleri burada yapılabilir
+              },
+            ),
+          ],
+        ),
+      ),
       body: _currentPosition == null
           ? const Center(child: CircularProgressIndicator())
-          : FlutterMap(
+          : MapWidget(
+              initialPosition: _currentPosition!,
               mapController: _mapController,
-              options: MapOptions(
-                initialCenter: _currentPosition ?? LatLng(0, 0),
-                initialZoom: 15.0,
-              ),
-              children: [
-                TileLayer(
-                  urlTemplate:
-                      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  subdomains: ['a', 'b', 'c'],
-                  // tileSize: 256,
-                  retinaMode: true,
-                ),
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: _currentPosition!,
-                      child: const Icon(
-                        Icons.location_on,
-                        color: Colors.red,
-                        size: 40,
-                      ),
-                    ),
-                  ],
+              markers: [
+                Marker(
+                  point: _currentPosition!,
+                  child: const Icon(
+                    Icons.location_on,
+                    color: Colors.red,
+                    size: 40,
+                  ),
                 ),
               ],
             ),

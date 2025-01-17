@@ -8,13 +8,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
       title: Text(title),
       actions: [
         IconButton(
+          icon: const Icon(Icons.phone),
           onPressed: () {
-            // Ayarlar butonunun işlevi
+            // Operatöre bağlanma işlemleri burada yapılabilir
+            print('Operatöre bağlan');
           },
-          icon: const Icon(Icons.settings),
         ),
       ],
     );

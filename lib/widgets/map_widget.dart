@@ -26,6 +26,7 @@ class MapWidget extends StatelessWidget {
         TileLayer(
           urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
           subdomains: ['a', 'b', 'c'],
+          tileSize: 256,
           retinaMode: true,
         ),
         MarkerLayer(

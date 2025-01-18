@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:road_runner_app/constants/colors.dart';
+import 'package:road_runner_app/widgets/custom_drawer.dart';
 import 'package:road_runner_app/widgets/custom_app_bar.dart';
 import 'package:road_runner_app/widgets/map_widget.dart';
 
@@ -77,48 +79,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.transparent,
       appBar: const CustomAppBar(title: 'Ana Sayfa'),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue,
-              ),
-              child: Text(
-                'Menü',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('Ana Sayfa'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Ayarlar'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Çıkış Yap'),
-              onTap: () {
-                Navigator.pop(context);
-                // Çıkış işlemleri burada yapılabilir
-              },
-            ),
-          ],
-        ),
-      ),
+      drawer: CustomDrawer(),
       body: _currentPosition == null
           ? const Center(child: CircularProgressIndicator())
           : MapWidget(

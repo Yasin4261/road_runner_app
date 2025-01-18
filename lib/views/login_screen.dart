@@ -34,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 60),
                 // Logo veya uygulama adı
                 Icon(
-                  Icons.local_shipping_outlined,
+                  Icons.directions_bike_rounded,
                   size: 80,
                   color: AppColors.primary,
                 ),

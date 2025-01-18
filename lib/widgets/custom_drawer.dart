@@ -28,7 +28,6 @@ class CustomDrawer extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.black54,
               borderRadius: BorderRadius.circular(8.0),
-              border: Border.all(color: Colors.white, width: 1.0),
             ),
             child: ListTile(
               leading: Container(
@@ -37,7 +36,6 @@ class CustomDrawer extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.black54,
                   borderRadius: BorderRadius.circular(8.0),
-                  border: Border.all(color: Colors.white, width: 1.0),
                 ),
                 child: Icon(Icons.home,
                     color: Colors.white, size: AppDimensions.iconSize),
@@ -54,7 +52,6 @@ class CustomDrawer extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.black54,
               borderRadius: BorderRadius.circular(8.0),
-              border: Border.all(color: Colors.white, width: 1.0),
             ),
             child: ListTile(
               leading: Container(
@@ -63,7 +60,6 @@ class CustomDrawer extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.black54,
                   borderRadius: BorderRadius.circular(8.0),
-                  border: Border.all(color: Colors.white, width: 1.0),
                 ),
                 child: Icon(Icons.settings,
                     color: Colors.white, size: AppDimensions.iconSize),
@@ -80,7 +76,6 @@ class CustomDrawer extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.black54,
               borderRadius: BorderRadius.circular(8.0),
-              border: Border.all(color: Colors.white, width: 1.0),
             ),
             child: ListTile(
               leading: Container(
@@ -89,7 +84,6 @@ class CustomDrawer extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.black54,
                   borderRadius: BorderRadius.circular(8.0),
-                  border: Border.all(color: Colors.white, width: 1.0),
                 ),
                 child: Icon(Icons.logout,
                     color: Colors.white, size: AppDimensions.iconSize),

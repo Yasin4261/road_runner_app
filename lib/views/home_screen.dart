@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:road_runner_app/constants/colors.dart';
+import 'package:road_runner_app/constants/dimensions.dart';
 import 'package:road_runner_app/widgets/custom_drawer.dart';
 import 'package:road_runner_app/widgets/custom_app_bar.dart';
 import 'package:road_runner_app/widgets/map_widget.dart';
@@ -81,7 +82,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.transparent,
-      appBar: const CustomAppBar(title: 'Ana Sayfa'),
+      appBar: CustomAppBar(
+        title: 'Slotlarım',
+        onPress: () {
+          print("Slotlarım tapped");
+        },
+      ),
       drawer: CustomDrawer(),
       body: _currentPosition == null
           ? const Center(child: CircularProgressIndicator())
@@ -92,9 +98,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 Marker(
                   point: _currentPosition!,
                   child: const Icon(
-                    Icons.location_on,
+                    Icons.directions_bike_rounded,
                     color: Colors.red,
-                    size: 40,
+                    size: AppDimensions.iconSize,
                   ),
                 ),
               ],

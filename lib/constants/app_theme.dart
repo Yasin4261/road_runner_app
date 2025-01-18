@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'colors.dart';
 
 class AppTheme {
   static ThemeData get theme {
@@ -7,7 +8,7 @@ class AppTheme {
       primaryColor: Colors.grey[900], // Ana renk
       scaffoldBackgroundColor: Colors.black, // Arka plan
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.transparent, // Şeffaf AppBar
+        backgroundColor: AppColors.primary, // Şeffaf AppBar
         elevation: 0,
         titleTextStyle: TextStyle(
           color: Colors.white,

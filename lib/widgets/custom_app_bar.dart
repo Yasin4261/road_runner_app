@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:road_runner_app/constants/colors.dart';
 import 'package:road_runner_app/constants/dimensions.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
+  final VoidCallback? onPress;
 
-  const CustomAppBar({Key? key, required this.title}) : super(key: key);
+  const CustomAppBar({super.key, required this.title, this.onPress});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +18,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           margin: const EdgeInsets.only(left: 8.0),
           padding: const EdgeInsets.all(4.0),
           decoration: BoxDecoration(
-            color: Colors.black54,
+            color: AppColors.background,
             borderRadius: BorderRadius.circular(8.0),
             border: Border.all(color: Colors.white, width: 1.0),
           ),
@@ -30,21 +32,24 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       centerTitle: true,
-      title: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-        decoration: BoxDecoration(
-          color: Colors.black54,
-          borderRadius: BorderRadius.circular(8.0),
-          border: Border.all(color: Colors.white, width: 1.0),
+      title: GestureDetector(
+        onTap: onPress,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.circular(8.0),
+            border: Border.all(color: Colors.white, width: 1.0),
+          ),
+          child: Text(title),
         ),
-        child: Text(title),
       ),
       actions: [
         Container(
           margin: const EdgeInsets.only(right: 8.0),
           padding: const EdgeInsets.all(4.0),
           decoration: BoxDecoration(
-            color: Colors.black54,
+            color: AppColors.background,
             borderRadius: BorderRadius.circular(8.0),
             border: Border.all(color: Colors.white, width: 1.0),
           ),

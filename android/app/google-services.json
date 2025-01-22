@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "304040222407",
+    "project_id": "roadrunner-2230f",
+    "storage_bucket": "roadrunner-2230f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:304040222407:android:10639b7293c62d9662e8e2",
+        "android_client_info": {
+          "package_name": "com.example.road_runner_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "304040222407-rsgil98eb9mda3mtgfq5dmi9q0liuano.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCj_27qEAafMqEFmNQLUg7prT_uDerPa24"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "304040222407-rsgil98eb9mda3mtgfq5dmi9q0liuano.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "304040222407-mnddmri1fk6ii3eeukl26rml7mumovur.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.roadRunnerApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

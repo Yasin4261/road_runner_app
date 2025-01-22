@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../constants/colors.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:go_router/go_router.dart';
+import 'package:road_runner_app/constants/colors.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -14,15 +16,52 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<void> _handleRegister() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
+
+      try {
+        UserCredential userCredential =
+            await _auth.createUserWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Registration successful! You can now log in.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        context.go('/');
+      } on FirebaseAuthException catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Registration failed: ${e.message}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } finally {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Kayıt Ol'),
+        title: const Text('Register'),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            context.go('/');
+          },
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -35,12 +74,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _emailController,
                   decoration: InputDecoration(
-                    labelText: 'E-posta',
+                    labelText: 'Email',
                     prefixIcon: Icon(Icons.email, color: AppColors.primary),
                   ),
                   validator: (value) {
-                    if (value?.isEmpty ?? true) {
-                      return 'E-posta gerekli';
+                    if (value == null || value.isEmpty) {
+                      return 'Email is required';
                     }
                     return null;
                   },
@@ -49,16 +88,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _passwordController,
                   decoration: InputDecoration(
-                    labelText: 'Şifre',
+                    labelText: 'Password',
                     prefixIcon: Icon(Icons.lock, color: AppColors.primary),
                   ),
                   obscureText: true,
                   validator: (value) {
-                    if (value?.isEmpty ?? true) {
-                      return 'Şifre gerekli';
+                    if (value == null || value.isEmpty) {
+                      return 'Password is required';
                     }
-                    if (value!.length < 6) {
-                      return 'Şifre en az 6 karakter olmalı';
+                    if (value.length < 6) {
+                      return 'Password must be at least 6 characters';
                     }
                     return null;
                   },
@@ -67,13 +106,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _confirmPasswordController,
                   decoration: InputDecoration(
-                    labelText: 'Şifre Tekrar',
+                    labelText: 'Confirm Password',
                     prefixIcon: Icon(Icons.lock, color: AppColors.primary),
                   ),
                   obscureText: true,
                   validator: (value) {
                     if (value != _passwordController.text) {
-                      return 'Şifreler eşleşmiyor';
+                      return 'Passwords do not match';
                     }
                     return null;
                   },
@@ -96,7 +135,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         )
                       : const Text(
-                          'Kayıt Ol',
+                          'Register',
                           style: TextStyle(fontSize: 16),
                         ),
                 ),
@@ -106,57 +145,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _handleRegister() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-
-      try {
-        print('Kayıt işlemi başlatılıyor...');
-        print('Email: ${_emailController.text}');
-
-        /*
-
-        final userCredential = await _authService.signUp(
-          _emailController.text.trim(),
-          _passwordController.text.trim(),
-        );
-        
-        
-        print('Kayıt başarılı: ${userCredential.user?.uid}');
-
-        */
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Kayıt başarılı! Giriş yapabilirsiniz.'),
-              backgroundColor: Colors.green,
-            ),
-          );
-
-          Navigator.of(context).pushReplacementNamed('/login');
-        }
-      } catch (e) {
-        print('Hata oluştu: $e');
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Kayıt olurken hata: ${e.toString()}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      } finally {
-        if (mounted) {
-          setState(() => _isLoading = false);
-        }
-      }
-    } else {
-      print('Form validasyonu başarısız');
-    }
   }
 
   @override

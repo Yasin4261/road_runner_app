@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../constants/colors.dart';
 import 'package:road_runner_app/views/home_screen.dart'; // HomeScreen importu
-
 import '../views/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -132,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Kayıt ol linki
                 TextButton(
                   onPressed: () {
-                    // TODO: Kayıt sayfasına yönlendirme
+                    // Kayıt sayfasına yönlendirme
                     context.go('/register');
                   },
                   child: Text(
@@ -153,25 +153,44 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _isLoading = true);
 
       try {
-        // Giriş işlemi
-        // Örneğin:
-        // final userCredential = await _authService.signIn(
-        //   _emailController.text.trim(),
-        //   _passwordController.text.trim(),
-        // );
-        context.go('/home'); // test için boş bırakıllmıştır silinmeli
+        // Firebase Authentication ile giriş yap
+        UserCredential userCredential =
+            await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
 
-        if (mounted) {
+        if (userCredential.user != null) {
           // Giriş başarılı, ana sayfaya yönlendir
           context.go('/home');
+        }
+      } on FirebaseAuthException catch (e) {
+        String errorMessage;
+        if (e.code == 'user-not-found') {
+          errorMessage = 'Bu e-posta ile bir kullanıcı bulunamadı.';
+        } else if (e.code == 'wrong-password') {
+          errorMessage = 'Yanlış şifre girdiniz.';
+        } else {
+          errorMessage = 'Bir hata oluştu: ${e.message}';
+        }
+
+        // Hata mesajını göster
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
       } catch (e) {
         print('Hata oluştu: $e');
 
+        // Genel hata mesajı
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Giriş yaparken hata: ${e.toString()}'),
+              content: Text('Bir hata oluştu. Lütfen tekrar deneyin.'),
               backgroundColor: Colors.red,
             ),
           );

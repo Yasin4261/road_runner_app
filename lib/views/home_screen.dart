@@ -64,17 +64,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _determinePosition() async {
-    final position = await Geolocator.getCurrentPosition();
-    setState(() {
-      _currentPosition = LatLng(position.latitude, position.longitude);
-    });
+    try {
+      final position = await Geolocator.getCurrentPosition();
+      setState(() {
+        _currentPosition = LatLng(position.latitude, position.longitude);
+      });
 
-    // FlutterMap widget'ı render edildikten sonra mapController'ı kullanın
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_currentPosition != null) {
-        _mapController.move(_currentPosition!, 15.0);
-      }
-    });
+      // FlutterMap widget'ı render edildikten sonra mapController'ı kullanın
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_currentPosition != null) {
+          _mapController.move(_currentPosition!, 15.0);
+        }
+      });
+    } catch (e) {
+      print('Konum alınamadı: $e');
+    }
   }
 
   @override

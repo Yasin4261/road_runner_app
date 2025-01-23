@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:road_runner_app/constants/colors.dart';
 import 'package:road_runner_app/constants/dimensions.dart';
 
@@ -91,7 +93,8 @@ class CustomDrawer extends StatelessWidget {
               title: const Text('Çıkış Yap',
                   style: TextStyle(color: Colors.white)),
               onTap: () {
-                Navigator.pop(context);
+                FirebaseAuth.instance.signOut();
+                context.go('/');
                 // Çıkış işlemleri burada yapılabilir
               },
             ),

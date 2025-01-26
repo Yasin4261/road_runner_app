@@ -15,34 +15,14 @@ class LoginViewModel extends ChangeNotifier {
     _setLoading(true);
 
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: user.email,
-        password: user.password,
+      await _authService.login(user.email, user.password);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Login successful!'),
+          backgroundColor: Colors.green,
+        ),
       );
-
-      // Kullanıcı token'ını al
-      String? token = await userCredential.user?.getIdToken();
-
-      // Web API'ye token ile giriş yap
-      if (token != null) {
-        bool loginSuccess = await _authService.loginWithToken(token);
-        if (loginSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Login successful!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          context.go('/home');
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Login failed: Invalid token'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
+      context.go('/home');
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -50,70 +30,13 @@ class LoginViewModel extends ChangeNotifier {
           backgroundColor: Colors.red,
         ),
       );
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  Future<void> fetchData(String endpoint) async {
-    _setLoading(true);
-
-    try {
-      String? token = await _auth.currentUser?.getIdToken();
-      if (token != null) {
-        final response = await _authService.getRequest(endpoint, token);
-        print('Data fetched: ${response.body}');
-      }
     } catch (e) {
-      print('Failed to fetch data: $e');
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  Future<void> postData(String endpoint, Map<String, dynamic> data) async {
-    _setLoading(true);
-
-    try {
-      String? token = await _auth.currentUser?.getIdToken();
-      if (token != null) {
-        final response = await _authService.postRequest(endpoint, token, data);
-        print('Data posted: ${response.body}');
-      }
-    } catch (e) {
-      print('Failed to post data: $e');
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  Future<void> updateData(String endpoint, Map<String, dynamic> data) async {
-    _setLoading(true);
-
-    try {
-      String? token = await _auth.currentUser?.getIdToken();
-      if (token != null) {
-        final response = await _authService.putRequest(endpoint, token, data);
-        print('Data updated: ${response.body}');
-      }
-    } catch (e) {
-      print('Failed to update data: $e');
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  Future<void> deleteData(String endpoint) async {
-    _setLoading(true);
-
-    try {
-      String? token = await _auth.currentUser?.getIdToken();
-      if (token != null) {
-        final response = await _authService.deleteRequest(endpoint, token);
-        print('Data deleted: ${response.body}');
-      }
-    } catch (e) {
-      print('Failed to delete data: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Login failed: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     } finally {
       _setLoading(false);
     }

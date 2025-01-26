@@ -1,129 +1,69 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthService {
   static const String baseUrl =
-      'https://your-api-url.com'; // API URL'nizi buraya yazın
+      'http://192.168.1.106:3001'; // API URL'nizi buraya yazın
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<Map<String, dynamic>> login(String email, String password) async {
+  Future<void> login(String email, String password) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/auth/login'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'email': email,
-          'password': password,
-        }),
+      // Firebase Authentication ile giriş yap
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
 
-      final data = jsonDecode(response.body);
+      // Kullanıcı token'ını al
+      String? token = await userCredential.user?.getIdToken();
+      print(
+          'Firebase Token: $token'); // Token'ı konsola yazdırarak kontrol edin
 
-      if (response.statusCode == 200) {
-        // Token'ı kaydet
-        final token = data['token'];
-        // TODO: Token'ı güvenli bir şekilde saklayın
-        return data;
+      // Web API'ye token ile giriş yap
+      if (token != null) {
+        final response = await http.post(
+          Uri.parse('$baseUrl/auth/login'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+        );
+
+        if (response.statusCode == 200) {
+          print('Login successful');
+        } else {
+          print('Login failed: ${response.statusCode}');
+          throw Exception('Login failed: ${response.statusCode}');
+        }
       } else {
-        throw Exception(data['message'] ?? 'Giriş başarısız');
+        print('Token alınamadı');
+        throw Exception('Token alınamadı');
       }
+    } on FirebaseAuthException catch (e) {
+      print('Firebase Authentication hatası: ${e.message}');
+      throw e;
     } catch (e) {
-      throw Exception('Bir hata oluştu: ${e.toString()}');
+      print('Bir hata oluştu: ${e.toString()}');
+      throw e;
     }
   }
 
-  Future<bool> loginWithToken(String token) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/auth/login'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        // Başarılı giriş
-        print('Login successful');
-        return true;
-      } else {
-        // Hata durumu
-        final data = jsonDecode(response.body);
-        print('Login failed: ${data['message']}');
-        return false;
-      }
-    } catch (e) {
-      print('An error occurred: ${e.toString()}');
-      return false;
-    }
-  }
-
-  Future<http.Response> getRequest(String endpoint, String token) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/$endpoint'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      return response;
-    } else {
-      throw Exception('Failed to load data');
-    }
-  }
-
-  Future<http.Response> postRequest(
-      String endpoint, String token, Map<String, dynamic> data) async {
+  Future<void> startShift(String token, String runnerId) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/$endpoint'),
+      Uri.parse('$baseUrl/api/runners/$runnerId/start-shift'),
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(data),
-    );
-
-    if (response.statusCode == 200) {
-      return response;
-    } else {
-      throw Exception('Failed to post data');
-    }
-  }
-
-  Future<http.Response> putRequest(
-      String endpoint, String token, Map<String, dynamic> data) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/$endpoint'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(data),
-    );
-
-    if (response.statusCode == 200) {
-      return response;
-    } else {
-      throw Exception('Failed to update data');
-    }
-  }
-
-  Future<http.Response> deleteRequest(String endpoint, String token) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/$endpoint'),
-      headers: {
-        'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
     );
 
     if (response.statusCode == 200) {
-      return response;
+      Map<String, dynamic> runner = json.decode(response.body);
+      print('Kurye vardiyaya başladı: $runner');
     } else {
-      throw Exception('Failed to delete data');
+      print('Vardiyaya başlama başarısız: ${response.statusCode}');
     }
   }
+
+  // Diğer istek fonksiyonları burada...
 }

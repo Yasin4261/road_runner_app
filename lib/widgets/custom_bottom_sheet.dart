@@ -151,7 +151,7 @@ class _OrderCard extends StatelessWidget {
         // Adding a new Row to display delay time below the subtitle
         isThreeLine: true, // Allows 3 lines of content
         dense: false, // Makes the widget more compact if set to true
-        // Add delay information
+        // Add delay information as a Row below subtitle
         onTap: () {
           showDialog(
             context: context,

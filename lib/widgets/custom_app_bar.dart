@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:road_runner_app/constants/colors.dart';
 import 'package:road_runner_app/constants/dimensions.dart';
+import 'package:road_runner_app/providers/courier_status_provider.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String title;
-  final VoidCallback? onPress;
+  final VoidCallback? onPress; // onPress parametresi eklendi
 
-  const CustomAppBar({super.key, required this.title, this.onPress});
+  const CustomAppBar({super.key, this.onPress});
 
   @override
   Widget build(BuildContext context) {
@@ -32,17 +33,22 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       centerTitle: true,
-      title: GestureDetector(
-        onTap: onPress,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-          decoration: BoxDecoration(
-            color: AppColors.background,
-            borderRadius: BorderRadius.circular(8.0),
-            border: Border.all(color: Colors.white, width: 1.0),
-          ),
-          child: Text(title),
-        ),
+      title: Consumer<CourierStatusProvider>(
+        builder: (context, provider, child) {
+          return GestureDetector(
+            onTap: onPress, // Kullanıcı tıkladığında onPress çağrılacak
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(8.0),
+                border: Border.all(color: Colors.white, width: 1.0),
+              ),
+              child: Text(provider.status), // Dinamik başlık
+            ),
+          );
+        },
       ),
       actions: [
         Container(
@@ -57,7 +63,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             icon: const Icon(Icons.phone),
             iconSize: AppDimensions.iconSize,
             onPressed: () {
-              // Operatöre bağlanma işlemleri burada yapılabilir
               print('Operatöre bağlan');
             },
           ),

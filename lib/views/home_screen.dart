@@ -7,6 +7,11 @@ import 'package:road_runner_app/constants/dimensions.dart';
 import 'package:road_runner_app/widgets/custom_drawer.dart';
 import 'package:road_runner_app/widgets/custom_app_bar.dart';
 import 'package:road_runner_app/widgets/map_widget.dart';
+import 'package:road_runner_app/widgets/courier_info_widget.dart'; // CourierInfoWidget'ı içe aktarın
+import 'package:provider/provider.dart';
+import 'package:road_runner_app/providers/courier_status_provider.dart';
+import 'package:road_runner_app/widgets/rider_widget.dart'; // CourierStatusProvider'ı içe aktarın
+import 'package:road_runner_app/widgets/custom_bottom_sheet.dart'; // _showBottomSheet fonksiyonunu içe aktarın
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -87,9 +92,31 @@ class _HomeScreenState extends State<HomeScreen> {
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.transparent,
       appBar: CustomAppBar(
-        title: 'Slotlarım',
         onPress: () {
-          print("Slotlarım tapped");
+          // onPress burada tanımlandı
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  height: MediaQuery.of(context).size.height * 0.8,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: CourierInfoWidget(
+                      courierName: 'Ahmet Yılmaz',
+                      courierStatus: 'Aktif',
+                      areaName: 'Saha 1',
+                      areaDetails: 'Detaylar burada yer alacak.',
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
         },
       ),
       drawer: CustomDrawer(),
@@ -99,16 +126,12 @@ class _HomeScreenState extends State<HomeScreen> {
               initialPosition: _currentPosition!,
               mapController: _mapController,
               markers: [
-                Marker(
-                  point: _currentPosition!,
-                  child: const Icon(
-                    Icons.directions_bike_rounded,
-                    color: Colors.red,
-                    size: AppDimensions.iconSize,
-                  ),
-                ),
+                Marker(point: _currentPosition!, child: RiderWidget()),
               ],
             ),
+      bottomSheet: context.watch<CourierStatusProvider>().status.isNotEmpty
+          ? const CustomBottomSheet()
+          : null,
     );
   }
 }

@@ -41,8 +41,8 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          foregroundColor: Colors.white,
-          backgroundColor: Colors.grey[850], // Metin rengi
+          foregroundColor: Colors.white, // Metin rengi
+          backgroundColor: AppColors.primary,
           shadowColor: Colors.grey[700],
           elevation: 6,
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),

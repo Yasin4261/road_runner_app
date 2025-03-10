@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
-import 'package:road_runner_app/models/user_model.dart';
+import 'package:road_runner_app/models/runner_model.dart';
 import 'package:road_runner_app/services/auth_service.dart';
 
 class LoginViewModel extends ChangeNotifier {
@@ -11,7 +11,7 @@ class LoginViewModel extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
 
-  Future<void> login(UserModel user, BuildContext context) async {
+  Future<void> login(Runner user, BuildContext context) async {
     _setLoading(true);
 
     try {

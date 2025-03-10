@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
-import 'package:road_runner_app/models/user_model.dart';
+import 'package:road_runner_app/models/runner_model.dart';
 
 class RegisterViewModel extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -9,7 +9,7 @@ class RegisterViewModel extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
 
-  Future<void> register(UserModel user, BuildContext context) async {
+  Future<void> register(Runner user, BuildContext context) async {
     _setLoading(true);
 
     try {

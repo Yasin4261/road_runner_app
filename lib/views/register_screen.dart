@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:road_runner_app/constants/colors.dart';
-import 'package:road_runner_app/models/user_model.dart';
+import 'package:road_runner_app/models/runner_model.dart';
 import 'package:road_runner_app/viewmodels/register_viewmodel.dart';
 
 class RegisterScreen extends StatelessWidget {
@@ -110,7 +110,7 @@ class _RegisterFormState extends State<RegisterForm> {
                 ? null
                 : () {
                     if (_formKey.currentState!.validate()) {
-                      final user = UserModel(
+                      final user = Runner(
                         name:
                             '', // Register formunda name alanı yok, bu yüzden boş bırakıyoruz
                         email: _emailController.text.trim(),

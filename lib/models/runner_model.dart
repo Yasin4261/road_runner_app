@@ -10,26 +10,26 @@ enum CurrentStatus { offline, available, busy, onBreak }
 
 @JsonSerializable()
 class Runner {
-  final String name;
-  final String phone;
+  final String? name;
+  final String? phone;
   final String? email;
   final String? password;
   final String? profileImageUrl;
-  final VehicleType vehicleType;
-  final CurrentStatus currentStatus;
-  final String shiftStartTime;
-  final int queuePosition;
+  final VehicleType? vehicleType;
+  final CurrentStatus? currentStatus;
+  final String? shiftStartTime;
+  final int? queuePosition;
 
   Runner({
-    required this.name,
-    required this.phone,
+    this.name,
+    this.phone,
     this.email,
     this.password,
     this.profileImageUrl,
-    required this.vehicleType,
-    required this.currentStatus,
-    required this.shiftStartTime,
-    required this.queuePosition,
+    this.vehicleType,
+    this.currentStatus,
+    this.shiftStartTime,
+    this.queuePosition,
   });
 
   factory Runner.fromJson(Map<String, dynamic> json) => _$RunnerFromJson(json);

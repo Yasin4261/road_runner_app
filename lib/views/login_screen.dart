@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:road_runner_app/constants/colors.dart';
-import 'package:road_runner_app/models/user_model.dart';
+import 'package:road_runner_app/models/runner_model.dart';
+import 'package:road_runner_app/models/runner_model.dart';
 import 'package:road_runner_app/viewmodels/login_viewmodel.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -127,7 +128,7 @@ class _LoginFormState extends State<LoginForm> {
                 ? null
                 : () {
                     if (_formKey.currentState!.validate()) {
-                      final user = UserModel(
+                      final user = Runner(
                         name:
                             '', // Login formunda name alanı yok, bu yüzden boş bırakıyoruz
                         email: _emailController.text.trim(),

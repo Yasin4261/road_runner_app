@@ -43,6 +43,9 @@ dependencies:
   firebase_core: ^3.10.1
   firebase_auth: ^5.4.1
   shared_preferences: ^2.4.0
+  socket_io_client: ^3.0.2
+  json_annotation: ^4.9.0
+  build_runner: ^2.4.15
 
 
 dev_dependencies:
@@ -55,6 +58,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  json_serializable: ^6.9.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

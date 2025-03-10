@@ -15,7 +15,11 @@ class LoginViewModel extends ChangeNotifier {
     _setLoading(true);
 
     try {
-      await _authService.login(user.email, user.password);
+      if (user.email == null || user.password == null) {
+        throw Exception('Email ve şifre gerekli');
+      }
+
+      await _authService.login(user.email!, user.password!);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Login successful!'),

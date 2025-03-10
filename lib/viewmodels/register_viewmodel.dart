@@ -13,10 +13,14 @@ class RegisterViewModel extends ChangeNotifier {
     _setLoading(true);
 
     try {
+      if (user.email == null || user.password == null) {
+        throw Exception('Email ve şifre gerekli');
+      }
+
       UserCredential userCredential =
           await _auth.createUserWithEmailAndPassword(
-        email: user.email,
-        password: user.password,
+        email: user.email!,
+        password: user.password!,
       );
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:road_runner_app/providers/courier_status_provider.dart';
 import 'package:road_runner_app/constants/app_theme.dart'; // Buton stilini içe aktarın
+import 'package:road_runner_app/viewmodels/shift_viewmodel.dart';
 
 class CourierInfoWidget extends StatefulWidget {
   final String courierName;
@@ -24,8 +25,8 @@ class CourierInfoWidget extends StatefulWidget {
 class _CourierInfoWidgetState extends State<CourierInfoWidget> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<CourierStatusProvider>(
-      builder: (context, provider, child) {
+    return Consumer2<CourierStatusProvider, ShiftViewModel>(
+      builder: (context, provider, shiftViewModel, child) {
         return SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -107,9 +108,18 @@ class _CourierInfoWidgetState extends State<CourierInfoWidget> {
                 SizedBox(height: 20),
                 DropdownButton<String>(
                   value: provider.status,
-                  onChanged: (String? newValue) {
+                  onChanged: (String? newValue) async {
                     if (newValue != null) {
                       provider.updateStatus(newValue);
+                      if (newValue == 'Aktif') {
+                        await shiftViewModel.startShift(
+                            "67ca03a6e7bd16c695581178"); // Here for courierId
+                      }
+                      if (newValue == 'Deaktif') {
+                        await shiftViewModel.endShift(
+                            "67ca03a6e7bd16c695581178"); // Here for courierId
+                        print('Vardiya sonlandırıldı butonuna basıldı...');
+                      }
                     }
                   },
                   items: <String>[

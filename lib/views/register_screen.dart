@@ -111,8 +111,12 @@ class _RegisterFormState extends State<RegisterForm> {
                 : () {
                     if (_formKey.currentState!.validate()) {
                       final user = UserModel(
+                        name:
+                            '', // Register formunda name alanı yok, bu yüzden boş bırakıyoruz
                         email: _emailController.text.trim(),
                         password: _passwordController.text.trim(),
+                        profileImageUrl:
+                            '', // Register formunda profileImageUrl alanı yok, bu yüzden boş bırakıyoruz
                       );
                       viewModel.register(user, context);
                     }

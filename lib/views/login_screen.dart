@@ -128,8 +128,12 @@ class _LoginFormState extends State<LoginForm> {
                 : () {
                     if (_formKey.currentState!.validate()) {
                       final user = UserModel(
+                        name:
+                            '', // Login formunda name alanı yok, bu yüzden boş bırakıyoruz
                         email: _emailController.text.trim(),
                         password: _passwordController.text.trim(),
+                        profileImageUrl:
+                            '', // Login formunda profileImageUrl alanı yok, bu yüzden boş bırakıyoruz
                       );
                       viewModel.login(user, context);
                     }

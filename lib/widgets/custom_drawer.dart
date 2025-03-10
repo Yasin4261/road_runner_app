@@ -25,81 +25,64 @@ class CustomDrawer extends StatelessWidget {
               ),
             ),
           ),
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-            decoration: BoxDecoration(
-              color: Colors.black54,
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: ListTile(
-              leading: Container(
-                margin: const EdgeInsets.only(right: 8.0),
-                padding: const EdgeInsets.all(4.0),
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Icon(Icons.home,
-                    color: Colors.white, size: AppDimensions.iconSize),
-              ),
-              title: const Text('Ana Sayfa',
-                  style: TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
+          _buildDrawerItem(
+            context,
+            icon: Icons.home,
+            text: 'Ana Sayfa',
+            onTap: () {
+              context.go('/home');
+            },
           ),
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-            decoration: BoxDecoration(
-              color: Colors.black54,
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: ListTile(
-              leading: Container(
-                margin: const EdgeInsets.only(right: 8.0),
-                padding: const EdgeInsets.all(4.0),
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Icon(Icons.settings,
-                    color: Colors.white, size: AppDimensions.iconSize),
-              ),
-              title:
-                  const Text('Ayarlar', style: TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
+          _buildDrawerItem(
+            context,
+            icon: Icons.person,
+            text: 'Profil',
+            onTap: () {
+              context.go('/profile');
+            },
           ),
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-            decoration: BoxDecoration(
-              color: Colors.black54,
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: ListTile(
-              leading: Container(
-                margin: const EdgeInsets.only(right: 8.0),
-                padding: const EdgeInsets.all(4.0),
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Icon(Icons.logout,
-                    color: Colors.white, size: AppDimensions.iconSize),
-              ),
-              title: const Text('Çıkış Yap',
-                  style: TextStyle(color: Colors.white)),
-              onTap: () {
-                FirebaseAuth.instance.signOut();
-                context.go('/');
-                // Çıkış işlemleri burada yapılabilir
-              },
-            ),
+          _buildDrawerItem(
+            context,
+            icon: Icons.settings,
+            text: 'Ayarlar',
+            onTap: () => Navigator.pop(context),
+          ),
+          _buildDrawerItem(
+            context,
+            icon: Icons.logout,
+            text: 'Çıkış Yap',
+            onTap: () {
+              FirebaseAuth.instance.signOut();
+              context.go('/');
+            },
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem(BuildContext context,
+      {required IconData icon,
+      required String text,
+      required VoidCallback onTap}) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+      decoration: BoxDecoration(
+        color: Colors.black54,
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: ListTile(
+        leading: Container(
+          margin: const EdgeInsets.only(right: 8.0),
+          padding: const EdgeInsets.all(4.0),
+          decoration: BoxDecoration(
+            color: Colors.black54,
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Icon(icon, color: Colors.white, size: AppDimensions.iconSize),
+        ),
+        title: Text(text, style: const TextStyle(color: Colors.white)),
+        onTap: onTap,
       ),
     );
   }

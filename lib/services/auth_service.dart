@@ -52,6 +52,11 @@ class AuthService {
     }
   }
 
+  Future<void> logout() async {
+    await _auth.signOut();
+    await _apiService.clearAuthToken();
+  }
+
   /*
 
   Future<void> startShift(String runnerId) async {

@@ -15,6 +15,7 @@ import 'package:road_runner_app/providers/courier_status_provider.dart';
 import 'package:road_runner_app/services/socket_service.dart';
 
 import 'package:road_runner_app/viewmodels/shift_viewmodel.dart';
+import 'package:road_runner_app/viewmodels/profile_viewmodel.dart';
 
 import 'firebase_options.dart';
 
@@ -62,6 +63,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => CourierStatusProvider()),
         ChangeNotifierProvider(create: (_) => ShiftViewModel()),
+        ChangeNotifierProvider(create: (_) => ProfileViewModel()),
         Provider.value(value: socketService),
       ],
       child: MaterialApp.router(

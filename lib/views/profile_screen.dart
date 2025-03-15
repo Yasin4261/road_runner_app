@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:road_runner_app/constants/colors.dart';
 import 'package:road_runner_app/constants/dimensions.dart';
 import 'package:road_runner_app/constants/text_styles.dart';
 import 'package:road_runner_app/viewmodels/profile_viewmodel.dart';
+import 'package:road_runner_app/widgets/custom_drawer.dart'; // Import the drawer widget
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -13,11 +15,12 @@ class ProfileScreen extends StatelessWidget {
     final runnerId = "runner_id"; // Bu runnerId'yi uygun şekilde alın
 
     return ChangeNotifierProvider(
-      create: (_) => ProfileViewModel()..loadRunnerProfile(runnerId),
+      create: (_) => ProfileViewModel()..fetchRunnerProfile(runnerId),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Profil'),
         ),
+        drawer: const CustomDrawer(), // Add the drawer widget
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(AppDimensions.paddingMedium),
@@ -27,39 +30,38 @@ class ProfileScreen extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                if (viewModel.runner == null) {
-                  return const Center(
-                      child: Text('Kullanıcı bilgileri yüklenemedi.'));
-                }
+                final runner = viewModel.runner;
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CircleAvatar(
                       radius: 50,
-                      backgroundImage: viewModel.runner!.profileImageUrl != null
-                          ? NetworkImage(viewModel.runner!.profileImageUrl!)
+                      backgroundImage: runner?.profileImageUrl != null
+                          ? NetworkImage(runner!.profileImageUrl!)
                           : null,
-                      child: viewModel.runner!.profileImageUrl == null
+                      child: runner?.profileImageUrl == null
                           ? const Icon(Icons.person, size: 50)
                           : null,
                     ),
                     const SizedBox(height: AppDimensions.paddingMedium),
-                    Text(
-                      viewModel.runner!.name ?? 'İsim yok',
-                      style: AppTextStyles.headline1,
-                    ),
-                    const SizedBox(height: AppDimensions.paddingSmall),
-                    Text(
-                      viewModel.runner!.email ?? 'Email yok',
-                      style: AppTextStyles.bodyText1,
-                    ),
+                    _buildProfileItem('Name', runner?.name),
+                    _buildProfileItem('Phone', runner?.phone),
+                    _buildProfileItem('Email', runner?.email),
+                    _buildProfileItem(
+                        'Vehicle Type', runner?.vehicleType?.toString()),
+                    _buildProfileItem(
+                        'Current Status', runner?.currentStatus?.toString()),
+                    _buildProfileItem(
+                        'Shift Start Time', runner?.shiftStartTime),
+                    _buildProfileItem(
+                        'Queue Position', runner?.queuePosition?.toString()),
                     const SizedBox(height: AppDimensions.paddingLarge),
                     ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         // Logout işlemi
-                        viewModel.logout();
-                        Navigator.of(context).pushReplacementNamed('/login');
+                        await viewModel.logout();
+                        context.go('/');
                       },
                       child: const Text('Çıkış Yap'),
                     ),
@@ -69,6 +71,21 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildProfileItem(String label, String? value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Text(
+            '$label: ',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Text(value ?? 'Not available'),
+        ],
       ),
     );
   }

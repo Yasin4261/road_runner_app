@@ -1,9 +1,11 @@
 import 'package:get_it/get_it.dart';
+import 'package:road_runner_app/data/services/auth_service.dart';
 import 'package:road_runner_app/data/services/location_service.dart';
 import 'package:road_runner_app/data/services/map_settings_service.dart';
 import 'package:road_runner_app/data/services/websocket_service.dart';
 import 'package:road_runner_app/viewmodels/assignment_viewmodel.dart';
 import 'package:road_runner_app/viewmodels/home_viewmodel.dart';
+import 'package:road_runner_app/viewmodels/login_viewmodel.dart';
 import 'package:road_runner_app/viewmodels/profile_viewmodel.dart';
 final GetIt locator = GetIt.instance;
 Future<void> setupLocator() async {
@@ -13,6 +15,7 @@ Future<void> setupLocator() async {
   locator.registerLazySingleton<LocationService>(() => LocationService.instance);
   locator.registerLazySingleton<MapSettingsService>(() => MapSettingsService.instance);
   locator.registerLazySingleton<WebSocketService>(() => WebSocketService());
+  locator.registerLazySingleton<AuthService>(() => AuthService());
   // ViewModels
   locator.registerFactory<HomeViewModel>(
     () => HomeViewModel(
@@ -25,5 +28,11 @@ Future<void> setupLocator() async {
   );
   locator.registerFactory<AssignmentViewModel>(
     () => AssignmentViewModel(webSocketService: locator<WebSocketService>()),
+  );
+  locator.registerFactory<LoginViewModel>(
+    () => LoginViewModel(
+      authService: locator<AuthService>(),
+      webSocketService: locator<WebSocketService>(),
+    ),
   );
 }

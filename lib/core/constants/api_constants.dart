@@ -1,9 +1,9 @@
 class ApiConstants {
   ApiConstants._();
   // Base URL - Change this to your API base URL
-  static const String baseUrl = 'http://10.0.2.2:8081';
+  static const String baseUrl = 'http://192.168.1.109:8081';
   // WebSocket
-  static const String wsUrl = 'ws://10.0.2.2:8081/ws';
+  static const String wsUrl = 'ws://192.168.1.109:8081/ws';
   // API Endpoints
   static const String login = '/api/v1/auth/login';
   static const String register = '/api/v1/auth/register';

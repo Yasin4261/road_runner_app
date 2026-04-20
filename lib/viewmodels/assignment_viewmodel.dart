@@ -18,21 +18,18 @@ class AssignmentViewModel extends BaseViewModel {
   bool get hasAssignments => _pendingAssignments.isNotEmpty;
   bool get isConnected => _webSocketService.isConnected;
   AssignmentViewModel({required WebSocketService webSocketService})
-      : _webSocketService = webSocketService;
-  /// Service locator'dan oluştur
-  factory AssignmentViewModel.fromLocator() {
-    return AssignmentViewModel(webSocketService: locator<WebSocketService>());
-  }
-  /// WebSocket bağlantısını başlat ve atamaları dinle
-  void startListening(String jwtToken) {
-    _webSocketService.connect(jwtToken);
+      : _webSocketService = webSocketService {
+    // Oluşturulduğunda otomatik olarak stream'e subscribe ol
     _subscription = _webSocketService.assignmentStream.listen(
       _onNotificationReceived,
       onError: (error) {
         setError('WebSocket hatası: $error');
       },
     );
-    setSuccess();
+  }
+  /// Service locator'dan oluştur
+  factory AssignmentViewModel.fromLocator() {
+    return AssignmentViewModel(webSocketService: locator<WebSocketService>());
   }
   void _onNotificationReceived(AssignmentNotification notification) {
     if (notification.isNewAssignment) {
@@ -40,7 +37,6 @@ class AssignmentViewModel extends BaseViewModel {
       _latestAssignment = notification;
       notifyListeners();
     } else if (notification.isTimeout) {
-      // Timeout olan atamayı listeden kaldır
       _pendingAssignments.removeWhere(
         (a) => a.assignmentId == notification.assignmentId,
       );
@@ -60,15 +56,10 @@ class AssignmentViewModel extends BaseViewModel {
     _latestAssignment = null;
     notifyListeners();
   }
-  /// Bağlantıyı durdur
-  void stopListening() {
-    _subscription?.cancel();
-    _subscription = null;
-    _webSocketService.disconnect();
-  }
   @override
   void dispose() {
-    stopListening();
+    _subscription?.cancel();
+    _subscription = null;
     super.dispose();
   }
 }

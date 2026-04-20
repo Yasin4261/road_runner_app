@@ -32,7 +32,7 @@ class WebSocketService {
 
     _client = StompClient(
       config: StompConfig(
-        url: '${ApiConstants.wsUrl}/websocket', // SockJS uyumlu endpoint
+        url: ApiConstants.wsUrl, // Raw WebSocket endpoint (SockJS değil)
         stompConnectHeaders: {
           'Authorization': 'Bearer $jwtToken',
         },

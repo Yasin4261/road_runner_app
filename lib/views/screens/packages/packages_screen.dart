@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:road_runner_app/data/models/assignment_notification.dart';
-import 'package:road_runner_app/viewmodels/assignment_viewmodel.dart';
+import 'package:road_runner_app/core/enums/order_status.dart';
+import 'package:road_runner_app/core/theme/app_colors.dart';
+import 'package:road_runner_app/core/utils/date_formatter.dart';
+import 'package:road_runner_app/data/models/courier_order.dart';
+import 'package:road_runner_app/viewmodels/active_delivery_viewmodel.dart';
+import 'package:road_runner_app/viewmodels/order_history_viewmodel.dart';
+import 'package:road_runner_app/views/screens/delivery/active_delivery_screen.dart';
+/// Paketlerim - aktif teslimat kısayolu + sipariş geçmişi
 class PackagesScreen extends StatelessWidget {
   const PackagesScreen({super.key});
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => AssignmentViewModel.fromLocator(),
+      create: (_) => OrderHistoryViewModel.fromLocator()..load(),
       child: const _PackagesView(),
     );
   }
@@ -16,184 +22,149 @@ class _PackagesView extends StatelessWidget {
   const _PackagesView();
   @override
   Widget build(BuildContext context) {
-    final viewModel = context.watch<AssignmentViewModel>();
+    final history = context.watch<OrderHistoryViewModel>();
+    final active = context.watch<ActiveDeliveryViewModel>();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Paketlerim'),
         centerTitle: true,
         actions: [
-          // Bağlantı durumu göstergesi
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: Icon(
-              Icons.circle,
-              size: 12,
-              color: viewModel.isConnected ? Colors.green : Colors.red,
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: history.isLoading ? null : history.load,
+          ),
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: history.refresh,
+        child: ListView(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          children: [
+            // Aktif teslimat kartı
+            if (active.hasActiveOrder && active.order != null)
+              _ActiveDeliveryCard(order: active.order!),
+            // Geçmiş başlığı
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Text('Geçmiş Siparişler',
+                  style:
+                      TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ),
-          ),
-        ],
-      ),
-      body: viewModel.pendingAssignments.isEmpty
-          ? const _EmptyState()
-          : _AssignmentList(assignments: viewModel.pendingAssignments),
-    );
-  }
-}
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.delivery_dining, size: 80, color: Colors.grey),
-          SizedBox(height: 16),
-          Text(
-            'Bekleyen atama yok',
-            style: TextStyle(fontSize: 18, color: Colors.grey),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Yeni sipariş geldiğinde burada görünecek',
-            style: TextStyle(fontSize: 14, color: Colors.grey),
-          ),
-        ],
+            if (history.isLoading)
+              const Padding(
+                padding: EdgeInsets.all(40),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (history.isError)
+              _ErrorBox(message: history.errorMessage, onRetry: history.load)
+            else if (history.orders.isEmpty)
+              const _EmptyState()
+            else
+              ...history.orders.map((o) => _HistoryCard(order: o)),
+          ],
+        ),
       ),
     );
   }
 }
-class _AssignmentList extends StatelessWidget {
-  final List<AssignmentNotification> assignments;
-  const _AssignmentList({required this.assignments});
+class _ActiveDeliveryCard extends StatelessWidget {
+  final CourierOrder order;
+  const _ActiveDeliveryCard({required this.order});
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: assignments.length,
-      itemBuilder: (context, index) {
-        return _AssignmentCard(assignment: assignments[index]);
-      },
-    );
-  }
-}
-class _AssignmentCard extends StatelessWidget {
-  final AssignmentNotification assignment;
-  const _AssignmentCard({required this.assignment});
-  @override
-  Widget build(BuildContext context) {
-    final details = assignment.orderDetails;
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 3,
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      color: AppColors.primary.withValues(alpha: 0.06),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: const BorderSide(color: AppColors.primary, width: 1),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(12),
+        leading: const CircleAvatar(
+          backgroundColor: AppColors.primary,
+          child: Icon(Icons.local_shipping, color: Colors.white),
+        ),
+        title: Text('Aktif Teslimat • #${order.id}',
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(
+            '${order.status.displayLabel} → ${order.endCustomerName ?? "Müşteri"}'),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: () {
+          final active = context.read<ActiveDeliveryViewModel>();
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => ChangeNotifierProvider.value(
+              value: active,
+              child: const ActiveDeliveryScreen(),
+            ),
+          ));
+        },
+      ),
+    );
+  }
+}
+class _HistoryCard extends StatelessWidget {
+  final CourierOrder order;
+  const _HistoryCard({required this.order});
+  Color get _statusColor {
+    switch (order.status) {
+      case OrderStatus.delivered:
+        return AppColors.success;
+      case OrderStatus.cancelled:
+      case OrderStatus.returned:
+        return AppColors.error;
+      default:
+        return AppColors.primary;
+    }
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Sipariş #${assignment.orderId}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                Text('#${order.id} • ${order.orderNumber}',
+                    style: const TextStyle(fontWeight: FontWeight.w700)),
+                const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: Colors.orange.shade100,
+                    color: _statusColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Text(
-                    'Bekliyor',
-                    style: TextStyle(
-                      color: Colors.orange,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                    ),
-                  ),
+                  child: Text(order.status.displayLabel,
+                      style: TextStyle(
+                          color: _statusColor,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700)),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            // Müşteri
-            if (details?.endCustomerName != null)
-              _InfoRow(
-                icon: Icons.person,
-                label: details!.endCustomerName!,
-              ),
-            // Paket
-            if (details?.packageDescription != null)
-              _InfoRow(
-                icon: Icons.inventory_2,
-                label: details!.packageDescription!,
-              ),
-            // Alış adresi
-            if (details?.pickupAddress != null)
-              _InfoRow(
-                icon: Icons.store,
-                label: details!.pickupAddress!,
-                iconColor: Colors.blue,
-              ),
-            // Teslimat adresi
-            if (details?.deliveryAddress != null)
-              _InfoRow(
-                icon: Icons.location_on,
-                label: details!.deliveryAddress!,
-                iconColor: Colors.red,
-              ),
-            // Ücret
-            if (details?.deliveryFee != null)
-              _InfoRow(
-                icon: Icons.payments,
-                label: '₺${details!.deliveryFee!.toStringAsFixed(2)}',
-                iconColor: Colors.green,
-              ),
-            const SizedBox(height: 16),
-            // Aksiyon butonları
+            const SizedBox(height: 8),
+            _line(Icons.person, order.endCustomerName ?? '-'),
+            _line(Icons.location_on, order.deliveryAddress),
             Row(
               children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      context
-                          .read<AssignmentViewModel>()
-                          .removeAssignment(assignment.assignmentId);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Atama reddedildi')),
-                      );
-                    },
-                    icon: const Icon(Icons.close, size: 18),
-                    label: const Text('Reddet'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
-                      side: const BorderSide(color: Colors.red),
-                    ),
+                Icon(Icons.payments, size: 15, color: AppColors.textSecondary),
+                const SizedBox(width: 6),
+                Text('₺${order.deliveryFee?.toStringAsFixed(2) ?? "-"}',
+                    style: const TextStyle(
+                        fontSize: 13, fontWeight: FontWeight.w600)),
+                const Spacer(),
+                if (order.updatedAt != null)
+                  Text(
+                    '${DateFormatter.shortDate(order.updatedAt!.toLocal())} '
+                    '${DateFormatter.hm(order.updatedAt!.toLocal())}',
+                    style: const TextStyle(
+                        fontSize: 11, color: AppColors.textHint),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: () {
-                      context
-                          .read<AssignmentViewModel>()
-                          .removeAssignment(assignment.assignmentId);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Atama kabul edildi!')),
-                      );
-                    },
-                    icon: const Icon(Icons.check, size: 18),
-                    label: const Text('Kabul Et'),
-                  ),
-                ),
               ],
             ),
           ],
@@ -201,30 +172,59 @@ class _AssignmentCard extends StatelessWidget {
       ),
     );
   }
+  Widget _line(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 15, color: AppColors.textSecondary),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 13)),
+          ),
+        ],
+      ),
+    );
+  }
 }
-class _InfoRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color? iconColor;
-  const _InfoRow({
-    required this.icon,
-    required this.label,
-    this.iconColor,
-  });
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.all(40),
+      child: Column(
+        children: [
+          Icon(Icons.history, size: 64, color: AppColors.textHint),
+          SizedBox(height: 12),
+          Text('Henüz tamamlanmış sipariş yok',
+              style: TextStyle(color: AppColors.textSecondary)),
+        ],
+      ),
+    );
+  }
+}
+class _ErrorBox extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  const _ErrorBox({required this.message, required this.onRetry});
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
+      padding: const EdgeInsets.all(24),
+      child: Column(
         children: [
-          Icon(icon, size: 18, color: iconColor ?? Colors.grey.shade600),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(fontSize: 14),
-              overflow: TextOverflow.ellipsis,
-            ),
+          const Icon(Icons.error_outline, color: AppColors.error, size: 40),
+          const SizedBox(height: 8),
+          Text(message, textAlign: TextAlign.center),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Tekrar Dene'),
           ),
         ],
       ),

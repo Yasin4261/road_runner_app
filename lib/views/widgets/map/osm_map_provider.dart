@@ -25,6 +25,7 @@ class OsmMapProvider implements MapProvider {
     required MapPosition position,
     required ValueChanged<MapPosition> onPositionChanged,
     MapPosition? userLocation,
+    List<MapMarker> markers = const [],
   }) {
     return FlutterMap(
       mapController: _controller,
@@ -51,6 +52,19 @@ class OsmMapProvider implements MapProvider {
           maxZoom: _tileProvider.maxZoom.toDouble(),
           tileSize: 256,
         ),
+        // Sipariş işaretçileri (pickup / delivery)
+        if (markers.isNotEmpty)
+          MarkerLayer(
+            markers: markers
+                .map((m) => Marker(
+                      point: LatLng(m.latitude, m.longitude),
+                      width: 44,
+                      height: 54,
+                      alignment: Alignment.topCenter,
+                      child: _OrderMarker(type: m.type, label: m.label),
+                    ))
+                .toList(),
+          ),
         if (userLocation != null)
           MarkerLayer(
             markers: [
@@ -78,6 +92,46 @@ class OsmMapProvider implements MapProvider {
   @override
   void dispose() {
     _controller.dispose();
+  }
+}
+
+/// Sipariş işaretçisi (pickup=mavi mağaza, delivery=kırmızı konum)
+class _OrderMarker extends StatelessWidget {
+  final MapMarkerType type;
+  final String? label;
+  const _OrderMarker({required this.type, this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final isPickup = type == MapMarkerType.pickup;
+    final color = isPickup ? Colors.blue.shade700 : Colors.red.shade700;
+    final icon = isPickup ? Icons.store : Icons.location_on;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.3),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Icon(icon, color: Colors.white, size: 18),
+        ),
+        Container(
+          width: 2,
+          height: 8,
+          color: color,
+        ),
+      ],
+    );
   }
 }
 

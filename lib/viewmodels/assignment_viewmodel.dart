@@ -1,14 +1,18 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:road_runner_app/core/di/service_locator.dart';
 import 'package:road_runner_app/data/models/assignment_notification.dart';
+import 'package:road_runner_app/data/services/courier_order_service.dart';
 import 'package:road_runner_app/data/services/websocket_service.dart';
 import 'package:road_runner_app/viewmodels/base_viewmodel.dart';
 /// Sipariş atamalarını yöneten ViewModel.
-/// WebSocket üzerinden gelen gerçek zamanlı atamaları dinler.
+/// - WebSocket üzerinden gerçek zamanlı atamaları dinler
+/// - REST API ile bekleyenleri yükler (WS kaçırılırsa fallback)
+/// - Kabul/Reddet işlemlerini backend'e iletir
 class AssignmentViewModel extends BaseViewModel {
   final WebSocketService _webSocketService;
+  final CourierOrderService _orderService;
   StreamSubscription<AssignmentNotification>? _subscription;
-  /// Bekleyen atamalar listesi
   final List<AssignmentNotification> _pendingAssignments = [];
   List<AssignmentNotification> get pendingAssignments =>
       List.unmodifiable(_pendingAssignments);
@@ -17,41 +21,108 @@ class AssignmentViewModel extends BaseViewModel {
   AssignmentNotification? get latestAssignment => _latestAssignment;
   bool get hasAssignments => _pendingAssignments.isNotEmpty;
   bool get isConnected => _webSocketService.isConnected;
-  AssignmentViewModel({required WebSocketService webSocketService})
-      : _webSocketService = webSocketService {
-    // Oluşturulduğunda otomatik olarak stream'e subscribe ol
+  bool _actionInProgress = false;
+  bool get actionInProgress => _actionInProgress;
+  AssignmentViewModel({
+    required WebSocketService webSocketService,
+    required CourierOrderService orderService,
+  })  : _webSocketService = webSocketService,
+        _orderService = orderService {
     _subscription = _webSocketService.assignmentStream.listen(
       _onNotificationReceived,
-      onError: (error) {
-        setError('WebSocket hatası: $error');
-      },
+      onError: (error) => debugPrint('[AssignmentVM] WS error: $error'),
     );
   }
-  /// Service locator'dan oluştur
   factory AssignmentViewModel.fromLocator() {
-    return AssignmentViewModel(webSocketService: locator<WebSocketService>());
+    return AssignmentViewModel(
+      webSocketService: locator<WebSocketService>(),
+      orderService: locator<CourierOrderService>(),
+    );
   }
   void _onNotificationReceived(AssignmentNotification notification) {
     if (notification.isNewAssignment) {
-      _pendingAssignments.add(notification);
+      final exists = _pendingAssignments
+          .any((a) => a.assignmentId == notification.assignmentId);
+      if (!exists) {
+        _pendingAssignments.add(notification);
+      }
       _latestAssignment = notification;
       notifyListeners();
     } else if (notification.isTimeout) {
-      _pendingAssignments.removeWhere(
-        (a) => a.assignmentId == notification.assignmentId,
-      );
+      _pendingAssignments
+          .removeWhere((a) => a.assignmentId == notification.assignmentId);
+      if (_latestAssignment?.assignmentId == notification.assignmentId) {
+        _latestAssignment = null;
+      }
       notifyListeners();
     }
   }
-  /// Atamayı listeden kaldır (kabul veya red sonrası)
-  void removeAssignment(int assignmentId) {
+  /// Bekleyen atamaları REST API'den yükle (WebSocket kaçırılmışsa)
+  Future<void> loadPendingFromApi() async {
+    try {
+      final list = await _orderService.getPendingAssignments();
+      for (final item in list) {
+        final assignmentId = (item['assignmentId'] as num?)?.toInt();
+        final orderId = (item['orderId'] as num?)?.toInt();
+        if (assignmentId == null || orderId == null) continue;
+        final exists =
+            _pendingAssignments.any((a) => a.assignmentId == assignmentId);
+        if (!exists) {
+          _pendingAssignments.add(AssignmentNotification(
+            type: 'NEW_ASSIGNMENT',
+            assignmentId: assignmentId,
+            orderId: orderId,
+            assignedAt: item['assignedAt']?.toString(),
+            timeoutAt: item['timeoutAt']?.toString(),
+          ));
+        }
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint('[AssignmentVM] loadPendingFromApi error: $e');
+    }
+  }
+  /// Atamayı kabul et → backend'e bildir. Başarılıysa orderId döner.
+  Future<int?> acceptAssignment(int assignmentId) async {
+    _actionInProgress = true;
+    notifyListeners();
+    try {
+      final assignment = _pendingAssignments
+          .firstWhere((a) => a.assignmentId == assignmentId);
+      await _orderService.acceptAssignment(assignmentId);
+      _removeLocal(assignmentId);
+      return assignment.orderId;
+    } catch (e) {
+      setError(CourierOrderService.extractError(e));
+      return null;
+    } finally {
+      _actionInProgress = false;
+      notifyListeners();
+    }
+  }
+  /// Atamayı reddet → backend'e bildir
+  Future<bool> rejectAssignment(int assignmentId, {String? reason}) async {
+    _actionInProgress = true;
+    notifyListeners();
+    try {
+      await _orderService.rejectAssignment(assignmentId, reason: reason);
+      _removeLocal(assignmentId);
+      return true;
+    } catch (e) {
+      setError(CourierOrderService.extractError(e));
+      return false;
+    } finally {
+      _actionInProgress = false;
+      notifyListeners();
+    }
+  }
+  void _removeLocal(int assignmentId) {
     _pendingAssignments.removeWhere((a) => a.assignmentId == assignmentId);
     if (_latestAssignment?.assignmentId == assignmentId) {
       _latestAssignment = null;
     }
-    notifyListeners();
   }
-  /// Son popup'ı temizle
+  /// Son popup'ı temizle (kullanıcı kapatınca)
   void clearLatest() {
     _latestAssignment = null;
     notifyListeners();

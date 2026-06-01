@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:road_runner_app/core/utils/jwt_utils.dart';
 
 /// Oturum bilgilerini SharedPreferences'ta yönetir.
 class AuthStorage {
@@ -42,10 +43,26 @@ class AuthStorage {
     return prefs.getString(_keyName);
   }
 
-  /// Oturum var mı?
+  /// Oturum geçerli mi?
+  /// Token yoksa VEYA süresi dolmuşsa false döner.
+  /// Süresi dolmuş token bulunursa otomatik temizlenir.
   static Future<bool> isLoggedIn() async {
     final token = await getToken();
-    return token != null && token.isNotEmpty;
+    if (token == null || token.isEmpty) return false;
+
+    if (JwtUtils.isExpired(token)) {
+      // Süresi dolmuş oturumu temizle ki app login ekranına yönlensin
+      await clear();
+      return false;
+    }
+    return true;
+  }
+
+  /// Token süresi dolmuş mu? (oturum açıkken kontrol için)
+  static Future<bool> isTokenExpired() async {
+    final token = await getToken();
+    if (token == null || token.isEmpty) return true;
+    return JwtUtils.isExpired(token);
   }
 
   /// Oturumu temizle

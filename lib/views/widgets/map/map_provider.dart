@@ -8,6 +8,7 @@ abstract class MapProvider {
     required MapPosition position,
     required ValueChanged<MapPosition> onPositionChanged,
     MapPosition? userLocation,
+    List<MapMarker> markers,
   });
 
   /// Move camera to position

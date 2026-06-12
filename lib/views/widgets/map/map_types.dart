@@ -30,15 +30,38 @@ class MapPosition {
     longitude: 28.9784,
     zoom: 15.0,
   );
+
+  /// Kadıköy merkez - sipariş konumları için varsayılan
+  static const MapPosition kadikoy = MapPosition(
+    latitude: 40.9907,
+    longitude: 29.0245,
+    zoom: 14.0,
+  );
+}
+
+/// Haritada gösterilecek işaretçi tipi
+enum MapMarkerType { pickup, delivery, courier }
+
+/// Harita işaretçisi modeli
+class MapMarker {
+  final double latitude;
+  final double longitude;
+  final MapMarkerType type;
+  final String? label;
+
+  const MapMarker({
+    required this.latitude,
+    required this.longitude,
+    required this.type,
+    this.label,
+  });
 }
 
 /// Map provider type enum
 enum MapProviderType {
   google,
   openStreetMap,
-}
-
-/// Extension for display names
+}/// Extension for display names
 extension MapProviderTypeExtension on MapProviderType {
   String get displayName {
     switch (this) {

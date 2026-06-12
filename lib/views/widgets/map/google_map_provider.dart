@@ -19,6 +19,7 @@ class GoogleMapProvider implements MapProvider {
     required MapPosition position,
     required ValueChanged<MapPosition> onPositionChanged,
     MapPosition? userLocation,
+    List<MapMarker> markers = const [],
   }) {
     return GoogleMap(
       initialCameraPosition: CameraPosition(
@@ -38,6 +39,21 @@ class GoogleMapProvider implements MapProvider {
       onCameraIdle: () {
         onPositionChanged(_currentPosition);
       },
+      markers: markers.map((m) {
+        final isPickup = m.type == MapMarkerType.pickup;
+        return Marker(
+          markerId: MarkerId('${m.type}_${m.latitude}_${m.longitude}'),
+          position: LatLng(m.latitude, m.longitude),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            isPickup
+                ? BitmapDescriptor.hueAzure
+                : BitmapDescriptor.hueRed,
+          ),
+          infoWindow: InfoWindow(
+            title: m.label ?? (isPickup ? 'Alış (Restoran)' : 'Teslimat'),
+          ),
+        );
+      }).toSet(),
       myLocationEnabled: userLocation != null,
       myLocationButtonEnabled: false,
       zoomControlsEnabled: false,
